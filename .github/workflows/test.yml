@@ -37,7 +37,7 @@ jobs:
 
       - name: Install pip packages
         run: |
-          pip install --upgrade uv && uv pip sync --system --cache-dir ${{ env.UV_CACHE_DIR }} -r requirements-dev.lock
+          pip install --upgrade uv && uv pip sync --cache-dir ${{ env.UV_CACHE_DIR }} --system requirements-dev.lock
 
       - name: Ruff Lint&Format Check
         run: |
