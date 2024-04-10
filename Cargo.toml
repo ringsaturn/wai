@@ -1,0 +1,26 @@
+[package]
+name = "wai"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The name of the native library. This is the name which will be used in Python to import the
+# library (i.e. `import string_sum`). If you change this, you must also change the name of the
+# `#[pymodule]` in `src/lib.rs`.
+name = "wai"
+# "cdylib" is necessary to produce a shared library for Python to import from.
+#
+# Downstream Rust code (including code in `bin/`, `examples/`, and `tests/`) will not be able
+# to `use string_sum;` unless the "rlib" or "lib" crate type is also included, e.g.:
+# crate-type = ["cdylib", "rlib"]
+crate-type = ["cdylib"]
+
+[dependencies]
+reverse_geocoder = "4.1.1"
+country-geocoder = {git = "https://github.com/a-b-street/country-geocoder", rev = "4a9b736340f7824f24f4e35cede1ffbceac2ec84"}
+pyo3 = {version = "0.21.1", features = ["extension-module"]}
+tzf-rs = { version = "0.4.7", default-features = false }
+lazy_static = "1.4.0"
+geo = "0.28.0"
