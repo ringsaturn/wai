@@ -1,5 +1,5 @@
 import pytest
-from wai import get_tz, get_country, get_city
+from wai import get_city, get_country, get_tz
 
 
 @pytest.mark.parametrize(

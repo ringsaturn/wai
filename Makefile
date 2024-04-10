@@ -9,6 +9,7 @@ bench:
 
 fmt:
 	cargo fmt
+	ruff check --select I --fix .
 	rye fmt
 
 lint:

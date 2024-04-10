@@ -1,5 +1,5 @@
 from citiespy import random_city
-from wai import get_tz, get_country, get_city
+from wai import get_city, get_country, get_tz
 
 # warmup lazy init
 _ = random_city()
