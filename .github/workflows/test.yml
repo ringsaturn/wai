@@ -1,63 +1,90 @@
-name: ci
+name: Test
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  test:
+  Testing:
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12"]
         os: [ubuntu-latest, windows-latest, macos-latest]
-
-    env:
-      UV_CACHE_DIR: "~/.cache/uv"
-      CONDA_PREFIX: /usr/share/miniconda
-
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
+
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Add conda to system path
+      - name: Create virtual environment
         run: |
-          # $CONDA is an environment variable pointing to the root of the miniconda directory
-          echo $CONDA/bin >> $GITHUB_PATH
-          echo $CONDA
+          python -m venv venv
 
-      - name: Restore uv cache
-        uses: actions/cache@v4
+      - name: "Test Rust"
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          cargo test
+
+      - name: Install wai and test(Windows)
+        if: matrix.os == 'windows-latest'
+        shell: bash
+        run: |
+          source venv/Scripts/activate
+          python -m pip install --upgrade pip
+          pip install -r requirements_dev.txt
+          maturin develop --release
+          pytest | tee benchmark_result.txt
+
+      - name: Install wai and test(Ubuntu&macoS)
+        if: matrix.os != 'windows-latest'
+        shell: bash
+        run: |
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements_dev.txt
+          maturin develop --release
+          pytest | tee benchmark_result.txt
+
+      - name: Setup benchmark file name
+        id: gen-benchmark-file-name
+        shell: bash
+        run: |
+          echo "filename=wai_benchmark_py_${{ matrix.python-version }}_${{ matrix.os }}.md" >> $GITHUB_OUTPUT
+
+      - name: Report
+        shell: bash
+        run: |
+          set +e
+          echo "## Python ${{ matrix.python-version }} with ${{ matrix.os }}" >> ${{ steps.gen-benchmark-file-name.outputs.filename }}
+          echo '```' >> ${{ steps.gen-benchmark-file-name.outputs.filename }}
+          cat benchmark_result.txt >> ${{ steps.gen-benchmark-file-name.outputs.filename }}
+          echo '```' >> ${{ steps.gen-benchmark-file-name.outputs.filename }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          path: ${{ env.UV_CACHE_DIR }}
-          key: ${{ runner.os }}-uv-${{ matrix.python-version }}-${{ hashFiles('requirements*.lock') }}
+          name: "benchmark_result_as_md_${{ matrix.python-version }}_${{ matrix.os }}"
+          path: ${{ steps.gen-benchmark-file-name.outputs.filename }}
 
-      - name: Install pip packages
-        run: |
-          pip install --upgrade uv && uv pip sync --cache-dir ${{ env.UV_CACHE_DIR }} --system requirements-dev.lock
-
-      - name: Ruff Lint&Format Check
-        run: |
-          ruff check .
-          ruff format --check .
-
-      - name: Maturin develop
-        uses: PyO3/maturin-action@v1
+  Report:
+    needs: [Testing]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download a Build Artifact
+        uses: actions/download-artifact@v4
         with:
-          maturin-version: latest
-          command: develop
-          args: --release
+          pattern: "benchmark_result_as_md*"
 
-      - name: Run Tests
-        run: |
-          pytest tests/
+      - run: find . -name "*.md" -exec cat {} \; > $GITHUB_STEP_SUMMARY
