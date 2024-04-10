@@ -1,5 +1,7 @@
 # `wai`: Where Am I
 
+## Usage
+
 ```py
 from wai import get_tz, get_country, get_city
 
@@ -12,6 +14,8 @@ print(get_country(121.4737, 31.2304))
 print(get_city(121.4737, 31.2304).name)
 # Shanghai
 ```
+
+## Benchmark
 
 ```console
 pytest tests/test_benchmark.py
@@ -39,3 +43,8 @@ Legend:
   OPS: Operations Per Second, computed as 1 / Mean
 ================================================================== 3 passed in 1.38s ===================================================================
 ```
+
+## LICENSE
+
+- This project is under [MIT license](./LICENSE)
+- Timezone Shape under [ODbL-1.0 license](https://github.com/ringsaturn/tzf-rel/blob/main/LICENSE)
