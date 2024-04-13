@@ -5,11 +5,14 @@
 #
 name: CI
 
+defaults:
+  run:
+    working-directory: wai-py
+
 on:
   push:
     branches:
       - main
-      - master
     tags:
       - '*'
   pull_request:

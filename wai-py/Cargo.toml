@@ -1,5 +1,5 @@
 [package]
-name = "wai"
+name = "wai-py"
 version = "0.1.0"
 edition = "2021"
 
@@ -24,7 +24,3 @@ pyo3 = {version = "0.21.1", features = ["extension-module"]}
 tzf-rs = { version = "0.4.8", default-features = false }
 lazy_static = "1.4.0"
 geo = "0.28.0"
-
-workspace = { members = [ "src/country_geocoder","wai-py"] }
-serde = "1.0.197"
-serde_derive = "1.0.197"
