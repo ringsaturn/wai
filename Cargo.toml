@@ -20,7 +20,7 @@ crate-type = ["cdylib"]
 [dependencies]
 reverse_geocoder = "4.1.1"
 country-geocoder = {git = "https://github.com/a-b-street/country-geocoder", rev = "4a9b736340f7824f24f4e35cede1ffbceac2ec84"}
-pyo3 = {version = "0.21.1", features = ["extension-module"]}
+pyo3 = {version = "0.24.1", features = ["extension-module"]}
 tzf-rs = { version = "0.4.8", default-features = false }
 lazy_static = "1.4.0"
 geo = "0.28.0"
